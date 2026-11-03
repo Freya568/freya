@@ -1,0 +1,216 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8f6f3;
+  --foreground: #0e0807;
+  --muted: #8a817b;
+  --ink-soft: #3a302c;
+  --line: rgba(14, 8, 7, 0.12);
+  --line-strong: rgba(14, 8, 7, 0.28);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-ink: var(--ink-soft);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --font-sans: var(--font-inter), var(--font-noto), sans-serif;
+  --font-display: var(--font-bodoni), var(--font-serif-sc), serif;
+  --font-mono: var(--font-plex), ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: #f8f6f3;
+}
+
+html.lenis {
+  scroll-behavior: auto;
+}
+
+body {
+  background: transparent;
+  color: #0e0807;
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: #0e0807;
+  color: #f8f6f3;
+}
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+
+.nav-wordmark {
+  font-family: var(--font-script), "Great Vibes", cursive;
+  font-weight: 400;
+}
+
+.site-header {
+  transform: translate(-50%, 0);
+  transition:
+    transform 0.85s cubic-bezier(0, 0, 0.2, 1),
+    opacity 0.6s linear;
+}
+
+html[data-stage="logo"],
+html[data-stage="exit"],
+html[data-stage="title"],
+html[data-stage="detail"] {
+  overflow: hidden;
+}
+
+html[data-stage="logo"] .site-header,
+html[data-stage="exit"] .site-header,
+html[data-stage="title"] .site-header,
+html[data-stage="detail"] .site-header {
+  transform: translate(-50%, -140%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+html[data-header="show"] .site-header {
+  transform: translate(-50%, 0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hero-lock {
+  transform: translateY(100lvh) scale(0.4);
+  transform-origin: center center;
+}
+
+html[data-stage="title"] .hero-lock,
+html[data-stage="detail"] .hero-lock,
+html[data-stage="done"] .hero-lock {
+  transform: translateY(0) scale(1);
+  /* Slightly longer rise so it overlaps the departing swash / mark */
+  transition: transform 2.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-detail {
+  opacity: 0;
+}
+
+html[data-stage="detail"] .hero-detail,
+html[data-stage="done"] .hero-detail {
+  opacity: 1;
+  transition: opacity 0.8s linear;
+}
+
+.hero-rule {
+  display: block;
+  width: 4rem;
+  height: 1px;
+  margin-top: 1rem;
+  background: #0e0807;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+html[data-stage="detail"] .hero-rule,
+html[data-stage="done"] .hero-rule {
+  transform: scaleX(1);
+  transition: transform 0.9s cubic-bezier(0.14, 1, 0.34, 1);
+}
+
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: transparent;
+}
+
+.intro__wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(820px, 94vw);
+  min-height: 42vh;
+  transform-origin: 50% 40%;
+}
+
+.intro__mark {
+  position: relative;
+  z-index: 2;
+  width: min(720px, 92vw);
+  height: auto;
+  overflow: visible;
+  display: block;
+}
+
+.intro__glyph {
+  fill: rgba(14, 8, 7, 0);
+  stroke: #0e0807;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.intro__swash-line {
+  fill: none;
+  stroke: #0e0807;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.menu-in {
+  background: #f8f6f3;
+  animation: rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rule-draw {
+  stroke-dasharray: 80;
+  stroke-dashoffset: 80;
+  animation: draw 0.8s 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>近况</title>
+<script>if (new URLSearchParams(location.search).has("plain")) document.documentElement.classList.add("plain");</script>
+<style>
+  :root {
+    --navy: #263246;
+    --paper: #f4f1ea;
+    --ink: #2c2a26;
+    --muted: #8f897f;
+    --book-w: 980px;
+    --book-h: 680px;
+    --radius: 26px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--navy);
+    overflow: hidden;
+    font-family: "Microsoft YaHei UI", "PingFang SC", "Noto Sans SC", sans-serif;
+  }
+
+  #stage {
+    width: 1080px;
+    height: 1440px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-origin: center center;
+    background:
+      radial-gradient(ellipse at 50% 46%, #31425c 0%, var(--navy) 58%, #1c2738 100%);
+    color: #f4f1ea;
+  }
+
+  header {
+    position: absolute;
+    top: 96px;
+    left: 0;
+    right: 0;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 64px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-indent: 0.22em;
+    line-height: 1;
+  }
+
+  .meta {
+    margin-top: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: rgba(244, 241, 234, 0.78);
+    font-size: 26px;
+    letter-spacing: 0.16em;
+  }
+
+  .meta svg { display: block; opacity: 0.9; }
+
+  .fan {
+    position: absolute;
+    left: 50%;
+    top: 420px;
+    width: var(--book-w);
+    height: var(--book-h);
+    transform: translateX(-50%);
+  }
+
+  .ground {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    bottom: -46px;
+    height: 54px;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.42), transparent 70%);
+    filter: blur(3px);
+    pointer-events: none;
+  }
+
+  .side {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: var(--paper);
+    overflow: hidden;
+    padding: 12px;
+  }
+
+  .side img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+  }
+
+  .side.l2 { left: 0; z-index: 0; transform: translateX(-86px); border-radius: var(--radius) 0 0 var(--radius); }
+  .side.l1 { left: 0; z-index: 1; transform: translateX(-44px); border-radius: var(--radius) 0 0 var(--radius); }
+  .side.r1 { right: 0; z-index: 1; transform: translateX(44px); border-radius: 0 var(--radius) var(--radius) 0; }
+  .side.r2 { right: 0; z-index: 0; transform: translateX(86px); border-radius: 0 var(--radius) var(--radius) 0; }
+  .side.l1 img, .side.l2 img { object-position: left center; }
+  .side.r1 img, .side.r2 img { object-position: right center; }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    perspective: 2400px;
+    perspective-origin: 50% 45%;
+    cursor: pointer;
+  }
+
+  .book {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    filter: drop-shadow(0 22px 28px rgba(0, 0, 0, 0.32));
+  }
+
+  .sheet, .leaf, .face {
+    position: absolute;
+    top: 0;
+    height: 100%;
+  }
+
+  .sheet, .leaf { width: 50%; }
+  .sheet { overflow: hidden; background: var(--paper); }
+  .sheet.left { left: 0; border-radius: var(--radius) 0 0 var(--radius); }
+  .sheet.right { right: 0; border-radius: 0 var(--radius) var(--radius) 0; }
+
+  .leaf {
+    right: 0;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+  }
+
+  .face {
+    inset: 0;
+    width: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+    background: var(--paper);
+  }
+
+  .face.front { border-radius: 0 var(--radius) var(--radius) 0; }
+  .face.back {
+    border-radius: var(--radius) 0 0 var(--radius);
+    transform: rotateY(180deg);
+  }
+
+  .bleed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .pos-trees { object-position: center 42%; }
+  .pos-sea { object-position: center 62%; }
+  .pos-cat { object-position: center 42%; }
+  .pos-seven { object-position: center 46%; }
+
+  .cap {
+    position: absolute;
+    left: 22px;
+    bottom: 18px;
+    z-index: 2;
+    color: #fff;
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+  }
+
+  .cap.dark {
+    color: #3d362e;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  .sheet.left::after,
+  .face.back::after,
+  .sheet.right::after,
+  .face.front::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 34px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .sheet.left::after,
+  .face.back::after {
+    right: 0;
+    background: linear-gradient(90deg, transparent, rgba(40, 36, 30, 0.16));
+  }
+
+  .sheet.right::after,
+  .face.front::after {
+    left: 0;
+    background: linear-gradient(270deg, transparent, rgba(40, 36, 30, 0.14));
+  }
+
+  .ed {
+    height: 100%;
+    padding: 32px 28px 24px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ed h2 {
+    margin: 0 0 18px;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--ink);
+  }
+
+  .ed .frame {
+    height: 360px;
+    overflow: hidden;
+    background: #e7e2d8;
+  }
+
+  .ed.tall .frame {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+
+  .ed .frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ed .note {
+    margin: 16px 0 0;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  .shade {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .face.front .shade {
+    background: linear-gradient(90deg, rgba(16, 18, 24, 0.55), rgba(16, 18, 24, 0) 62%);
+  }
+
+  .face.back .shade {
+    background: linear-gradient(270deg, rgba(16, 18, 24, 0.5), rgba(16, 18, 24, 0) 62%);
+  }
+
+  .cast {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 3;
+  }
+
+  .cast.right {
+    right: 0;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.28), transparent 72%);
+  }
+
+  .cast.left {
+    left: 0;
+    border-radius: var(--radius) 0 0 var(--radius);
+    background: linear-gradient(270deg, rgba(0, 0, 0, 0.26), transparent 72%);
+  }
+
+  html.plain,
+  html.plain body,
+  html.plain #stage {
+    background: #f8f6f3;
+  }
+
+  html.plain header,
+  html.plain .cap,
+  html.plain .ed h2,
+  html.plain .ed .note {
+    display: none;
+  }
+
+  html.plain .ed {
+    height: 100%;
+    padding: 0;
+  }
+
+  html.plain .ed .frame,
+  html.plain .ed.tall .frame {
+    position: absolute;
+    inset: 12%;
+    flex: none;
+    height: auto;
+  }
+
+  html.plain .bleed,
+  html.plain .side img,
+  html.plain .ed .frame img {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    object-position: center;
+    border-radius: 0;
+  }
+
+  html.plain .ed .frame {
+    inset: 5%;
+  }
+
+  html.plain .ed .frame img {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  html.plain .side {
+    padding: 0;
+  }
+
+  html.plain .fan {
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <header>
+      <h1>近况</h1>
+      <div class="meta">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+          <path d="M10.2 13.2a4.6 4.6 0 0 0 6.5 0l1.3-1.3a4.6 4.6 0 0 0-6.5-6.5l-.8.8"/>
+          <path d="M13.8 10.8a4.6 4.6 0 0 0-6.5 0l-1.3 1.3a4.6 4.6 0 0 0 6.5 6.5l.8-.8"/>
+        </svg>
+        <span>10 页</span>
+      </div>
+    </header>
+
+    <div class="fan">
+      <div class="ground"></div>
+      <div class="side l2"><img src="photos/feast.jpg" alt="" /></div>
+      <div class="side l1"><img src="photos/noodles.jpg" alt="" /></div>
+      <div class="side r1"><img src="photos/greycat.jpg" alt="" /></div>
+      <div class="side r2"><img src="photos/sheep.jpg" alt="" /></div>
+
+      <div class="scene">
+        <div class="book">
+          <div class="sheet left">
+            <img class="bleed" src="photos/trees.jpg" alt="" />
+          </div>
+
+          <div class="sheet right">
+            <img class="bleed" src="photos/sheep.jpg" alt="" style="object-position:center 40%" />
+          </div>
+
+          <div class="leaf">
+            <div class="face front"><img class="bleed" src="photos/music.jpg" alt="" /><i class="shade"></i></div>
+            <div class="face back"><img class="bleed" src="photos/noodles.jpg" alt="" /><i class="shade"></i></div>
+          </div>
+          <div class="leaf">
+            <div class="face front"><img class="bleed" src="photos/seven.jpg" alt="" /><i class="shade"></i></div>
+            <div class="face back"><img class="bleed" src="photos/friends.jpg" alt="" style="object-position:center 55%" /><i class="shade"></i></div>
+          </div>
+          <div class="leaf">
+            <div class="face front"><img class="bleed" src="photos/cat.jpg" alt="" /><i class="shade"></i></div>
+            <div class="face back"><img class="bleed" src="photos/greycat.jpg" alt="" /><i class="shade"></i></div>
+          </div>
+          <div class="leaf">
+            <div class="face front"><img class="bleed" src="photos/sea.jpg" alt="" /><i class="shade"></i></div>
+            <div class="face back"><img class="bleed" src="photos/feast.jpg" alt="" /><i class="shade"></i></div>
+          </div>
+
+          <div class="cast left" id="castL"></div>
+          <div class="cast right" id="castR"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const FLIP = 900;
+const leaves = [...document.querySelectorAll(".leaf")].reverse();
+const castL = document.getElementById("castL");
+const castR = document.getElementById("castR");
+const turned = leaves.map(() => false);
+let busy = false;
+
+function ease(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function applyLeaf(leaf, angle, z) {
+  leaf.style.zIndex = String(z);
+  leaf.style.transform = "rotateY(" + angle.toFixed(3) + "deg)";
+  const shade = Math.sin((Math.abs(angle) / 180) * Math.PI);
+  leaf.querySelector(".front .shade").style.opacity = (shade * 0.5).toFixed(3);
+  leaf.querySelector(".back .shade").style.opacity = (shade * 0.4).toFixed(3);
+}
+
+function paint() {
+  let zTop = 30;
+  leaves.forEach((leaf, i) => {
+    if (!turned[i]) applyLeaf(leaf, 0, zTop--);
+  });
+  let zLeft = 10;
+  leaves.forEach((leaf, i) => {
+    if (turned[i]) applyLeaf(leaf, -180, zLeft++);
+  });
+  castL.style.opacity = "0";
+  castR.style.opacity = "0";
+}
+
+function animateLeaf(leaf, from, to, z) {
+  return new Promise((resolve) => {
+    const t0 = performance.now();
+    const frame = (now) => {
+      const t = Math.min(1, (now - t0) / FLIP);
+      const angle = from + (to - from) * ease(t);
+      applyLeaf(leaf, angle, z);
+      const p = Math.abs(angle) / 180;
+      const wave = Math.sin(p * Math.PI);
+      castR.style.opacity = p < 0.55 ? (wave * 0.7).toFixed(3) : "0";
+      castL.style.opacity = p > 0.45 ? (wave * 0.55).toFixed(3) : "0";
+      if (t < 1) requestAnimationFrame(frame);
+      else resolve();
+    };
+    requestAnimationFrame(frame);
+  });
+}
+
+async function flipNext() {
+  if (busy) return;
+  const i = turned.findIndex((v) => !v);
+  if (i < 0) return;
+  busy = true;
+  await animateLeaf(leaves[i], 0, -180, 40);
+  turned[i] = true;
+  paint();
+  busy = false;
+}
+
+async function flipPrev() {
+  if (busy) return;
+  let i = -1;
+  for (let k = turned.length - 1; k >= 0; k--) {
+    if (turned[k]) { i = k; break; }
+  }
+  if (i < 0) return;
+  busy = true;
+  await animateLeaf(leaves[i], -180, 0, 40);
+  turned[i] = false;
+  paint();
+  busy = false;
+}
+
+document.querySelector(".fan").addEventListener("click", (e) => {
+  const rect = document.querySelector(".book").getBoundingClientRect();
+  if (e.clientX >= rect.left + rect.width / 2) flipNext();
+  else flipPrev();
+});
+
+function fit() {
+  const plain = document.documentElement.classList.contains("plain");
+  const stageW = plain ? 1220 : 1080;
+  const stageH = plain ? 820 : 1440;
+  const pad = 0.98;
+  const stage = document.getElementById("stage");
+  stage.style.width = stageW + "px";
+  stage.style.height = stageH + "px";
+  const s = Math.min(window.innerWidth / stageW, window.innerHeight / stageH) * pad;
+  stage.style.transform = "translate(-50%, -50%) scale(" + s + ")";
+}
+
+fit();
+window.addEventListener("resize", fit);
+paint();
+</script>
+</body>
+</html>
